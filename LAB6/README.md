@@ -2,6 +2,8 @@
 
 Lab 6: Code and Branch Coverage
 
+Link to my repository: https://github.com/ChatreshGudi/L6_L7_59_phone_repair_quote
+
 ## About
 
 A small Python module that quotes phone repairs by part, brand tier, warranty and express service, estimates turnaround time and values phones offered for trade-in.
