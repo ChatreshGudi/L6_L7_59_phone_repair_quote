@@ -1,29 +1,62 @@
 def mask_imei(imei):
     """
-    Removes dashes and spaces, then hides all but the last four digits.
-    Assumes imei is a non-empty string.
+    Keep only ASCII digits and mask all but the last four.
+
+    Invalid input returns an empty string. Short values are fully masked so
+    the function never reveals an entire partial IMEI.
     """
-    imei = imei.replace('-', '').replace(' ', '')
-    return '*' * (len(imei) - 4) + imei[-4:]
+    if not isinstance(imei, str):
+        return ""
+
+    digits = "".join(character for character in imei if "0" <= character <= "9")
+    if not digits:
+        return ""
+    if len(digits) <= 4:
+        return "*" * len(digits)
+    return "*" * (len(digits) - 4) + digits[-4:]
 
 def parse_parts_order(text):
     """
-    Parses 'screen x1; battery x2' into a {part: quantity} dictionary.
-    Assumes every item is written as 'part xQTY'.
+    Parse valid 'part xQTY' items into a {part: quantity} dictionary.
+
+    Malformed items, non-positive quantities, and non-string input are ignored.
     """
     order = {}
-    for item in text.split(';'):
-        part, qty = item.split('x')
-        order[part.strip()] = int(qty)
+    if not isinstance(text, str):
+        return order
+
+    for item in text.split(";"):
+        if "x" not in item:
+            continue
+        part, qty_text = item.rsplit("x", 1)
+        part = part.strip()
+        qty_text = qty_text.strip()
+        if not part or not qty_text:
+            continue
+        try:
+            quantity = int(qty_text)
+        except ValueError:
+            continue
+        if quantity > 0:
+            order[part] = quantity
     return order
 
 def parse_model(text):
     """
-    Splits 'Brand Model name' into a (brand, model) tuple.
-    Assumes text has at least two words.
+    Split 'Brand Model name' into a (brand, model) tuple.
+
+    Missing or invalid values return an empty pair; a one-word value becomes
+    the brand with an empty model.
     """
-    brand, model = text.strip().split(' ', 1)
-    return brand.title(), model.strip()
+    if not isinstance(text, str):
+        return "", ""
+
+    words = text.split()
+    if not words:
+        return "", ""
+    if len(words) == 1:
+        return words[0].title(), ""
+    return words[0].title(), " ".join(words[1:])
 
 def main():
     print("==== Running mask_imei ====")
